@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'Users',
     'Appartement',
     'Reservation',
+    'Visite',
     'corsheaders',
 ]
 

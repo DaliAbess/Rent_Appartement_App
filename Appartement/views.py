@@ -5,6 +5,8 @@ from .models import Appartement
 from .serializers import AppartementSerializer
 from Reservation.serializers import ReservationSerializer
 from Reservation.models import Reservation
+from Visite.serializers import VisiteSerializer
+from Visite.models import Visite
 from Users.models import User
 import re
 import json
@@ -76,5 +78,20 @@ class ReservationCreateView(APIView):
         if serializer.is_valid():
             # Automatically set the client to the user making the request
             serializer.save(client=request.user,appartement=appartement)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+@permission_classes([IsAuthenticated])
+class VisiteCreateView(APIView):
+    def post(self, request ,pk):
+        appartement = Appartement.objects.filter(pk=pk).first()
+        if appartement is None:
+            return Response({"message": "Appartement not found"}, status=status.HTTP_404_NOT_FOUND
+        )
+        if appartement.proprietaire == request.user :
+            return Response({"message": "You can not visit your own appartement "}, status=status.HTTP_403_FORBIDDEN)
+        serializer = VisiteSerializer(data=request.data)
+        if serializer.is_valid():
+            # Automatically set the client to the user making the request
+            serializer.save(client=request.user,appartement=appartement,status=True)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
